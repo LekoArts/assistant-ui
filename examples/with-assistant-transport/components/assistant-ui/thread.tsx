@@ -166,7 +166,7 @@ const Composer: FC = () => {
       <ComposerPrimitive.Root className="relative flex w-full flex-col rounded-2xl focus-within:ring-2 focus-within:ring-black focus-within:ring-offset-2 dark:focus-within:ring-white">
         <ComposerPrimitive.Input
           placeholder="Send a message..."
-          className="bg-muted border-border dark:border-muted-foreground/15 focus:outline-primary placeholder:text-muted-foreground max-h-[calc(50dvh)] min-h-16 w-full resize-none rounded-t-2xl border-x border-t px-4 pt-2 pb-3 text-base outline-none"
+          className="border-border bg-muted placeholder:text-muted-foreground focus:outline-primary dark:border-muted-foreground/15 max-h-[calc(50dvh)] min-h-16 w-full resize-none rounded-t-2xl border-x border-t px-4 pt-2 pb-3 text-base outline-none"
           rows={1}
           autoFocus
           aria-label="Message input"
@@ -179,7 +179,7 @@ const Composer: FC = () => {
 
 const ComposerAction: FC = () => {
   return (
-    <div className="bg-muted border-border dark:border-muted-foreground/15 relative flex items-center justify-between rounded-b-2xl border-x border-b p-2">
+    <div className="border-border bg-muted dark:border-muted-foreground/15 relative flex items-center justify-between rounded-b-2xl border-x border-b p-2">
       <TooltipIconButton
         tooltip="Attach file"
         variant="ghost"
@@ -196,7 +196,7 @@ const ComposerAction: FC = () => {
           <Button
             type="submit"
             variant="default"
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+            className="border-muted-foreground/60 hover:bg-primary/75 dark:border-muted-foreground/90 size-8 rounded-full border"
             aria-label="Send message"
           >
             <ArrowUpIcon className="size-5" />
@@ -209,7 +209,7 @@ const ComposerAction: FC = () => {
           <Button
             type="button"
             variant="default"
-            className="dark:border-muted-foreground/90 border-muted-foreground/60 hover:bg-primary/75 size-8 rounded-full border"
+            className="border-muted-foreground/60 hover:bg-primary/75 dark:border-muted-foreground/90 size-8 rounded-full border"
             aria-label="Stop generating"
           >
             <Square className="size-3.5 fill-white dark:size-4 dark:fill-black" />
@@ -223,7 +223,7 @@ const ComposerAction: FC = () => {
 const MessageError: FC = () => {
   return (
     <MessagePrimitive.Error>
-      <ErrorPrimitive.Root className="border-destructive bg-destructive/10 dark:bg-destructive/5 text-destructive mt-2 rounded-md border p-3 text-sm dark:text-red-200">
+      <ErrorPrimitive.Root className="border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
         <ErrorPrimitive.Message className="line-clamp-2" />
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
@@ -239,7 +239,7 @@ const AssistantMessage: FC = () => {
         animate={{ y: 0, opacity: 1 }}
         data-role="assistant"
       >
-        <div className="ring-border bg-background col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
+        <div className="bg-background ring-border col-start-1 row-start-1 flex size-8 shrink-0 items-center justify-center rounded-full ring-1">
           <StarIcon size={14} />
         </div>
 
@@ -267,7 +267,7 @@ const AssistantActionBar: FC = () => {
       hideWhenRunning
       autohide="not-last"
       autohideFloat="single-branch"
-      className="text-muted-foreground data-floating:bg-background col-start-3 row-start-2 mt-3 ml-3 flex gap-1 data-floating:absolute data-floating:mt-2 data-floating:rounded-md data-floating:border data-floating:p-1 data-floating:shadow-sm"
+      className="data-floating:bg-background text-muted-foreground col-start-3 row-start-2 mt-3 ml-3 flex gap-1 data-floating:absolute data-floating:mt-2 data-floating:rounded-md data-floating:border data-floating:p-1 data-floating:shadow-sm"
     >
       <ActionBarPrimitive.Copy asChild>
         <TooltipIconButton tooltip="Copy">
