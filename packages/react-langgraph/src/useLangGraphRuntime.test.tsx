@@ -289,4 +289,72 @@ describe("useLangGraphRuntime", () => {
     // Should not throw any errors even when events are processed without handlers
     expect(runtimeResult.current).toBeDefined();
   });
+
+  it("should handle file attachments in user messages", async () => {
+    const streamMock = vi.fn().mockImplementation((messages) => {
+      // Verify that file content is properly transformed
+      const userMessage = messages.find((m: any) => m.type === "human");
+      if (userMessage) {
+        expect(Array.isArray(userMessage.content)).toBe(true);
+        const fileContent = (userMessage.content as any[]).find(
+          (c) => c.type === "file",
+        );
+        if (fileContent) {
+          expect(fileContent.file).toBeDefined();
+          expect(fileContent.file.filename).toEqual("test.pdf");
+          expect(fileContent.file.file_data).toEqual("base64data");
+          expect(fileContent.file.mime_type).toEqual("application/pdf");
+        }
+      }
+      return mockStreamCallbackFactory([metadataEvent])();
+    });
+
+    const { result: runtimeResult } = renderHook(
+      () =>
+        useLangGraphRuntime({
+          stream: streamMock,
+        }),
+      {},
+    );
+
+    const wrapper = wrapperFactory(runtimeResult.current);
+
+    const { result: sendResult } = renderHook(() => useLangGraphSend(), {
+      wrapper,
+    });
+
+    // Wait a tick for the runtime to be fully mounted
+    await waitFor(() => {
+      expect(sendResult.current).toBeDefined();
+    });
+
+    act(() => {
+      sendResult.current(
+        [
+          {
+            type: "human",
+            content: [
+              {
+                type: "text",
+                text: "Here is a file",
+              },
+              {
+                type: "file",
+                file: {
+                  filename: "test.pdf",
+                  file_data: "base64data",
+                  mime_type: "application/pdf",
+                },
+              },
+            ],
+          },
+        ],
+        {},
+      );
+    });
+
+    await waitFor(() => {
+      expect(streamMock).toHaveBeenCalled();
+    });
+  });
 });

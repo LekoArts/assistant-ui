@@ -3,7 +3,11 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 
 import { useLangGraphMessages } from "./useLangGraphMessages";
 import { appendLangChainChunk } from "./appendLangChainChunk";
-import { MessageContentImageUrl, MessageContentText } from "./types";
+import {
+  MessageContentImageUrl,
+  MessageContentText,
+  MessageContentFile,
+} from "./types";
 import { mockStreamCallbackFactory } from "./testUtils";
 
 const metadataEvent = {
@@ -768,6 +772,175 @@ describe("useLangGraphMessages", {}, () => {
       expect(result.current.messages[2].content).toEqual(
         "This is a streamed AI response",
       );
+    });
+  });
+
+  it("handles file content in AI message responses", async () => {
+    const mockStreamCallback = mockStreamCallbackFactory([
+      metadataEvent,
+      {
+        event: "messages",
+        data: [
+          {
+            id: "run-1",
+            content: [
+              {
+                type: "text",
+                text: "Here is the file you requested:",
+              },
+              {
+                type: "file",
+                file: {
+                  filename: "document.pdf",
+                  file_data: "base64encodeddata",
+                  mime_type: "application/pdf",
+                },
+              },
+            ],
+            type: "AIMessageChunk",
+            name: null,
+            tool_calls: [],
+            invalid_tool_calls: [],
+            tool_call_chunks: [],
+          },
+          {
+            run_attempt: 1,
+          },
+        ],
+      },
+    ]);
+
+    const { result } = renderHook(() =>
+      useLangGraphMessages({
+        stream: mockStreamCallback,
+        appendMessage: appendLangChainChunk,
+      }),
+    );
+
+    act(() => {
+      result.current.sendMessage(
+        [
+          {
+            type: "human",
+            content: "Please send me the document",
+          },
+        ],
+        {},
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.messages.length).toEqual(2);
+      expect(result.current.messages[0].type).toEqual("human");
+      expect(result.current.messages[1].type).toEqual("ai");
+
+      // Check text content
+      expect(
+        (result.current.messages[1].content[0] as MessageContentText).type,
+      ).toEqual("text");
+      expect(
+        (result.current.messages[1].content[0] as MessageContentText).text,
+      ).toEqual("Here is the file you requested:");
+
+      // Check file content
+      expect(
+        (result.current.messages[1].content[1] as MessageContentFile).type,
+      ).toEqual("file");
+      expect(
+        (result.current.messages[1].content[1] as MessageContentFile).file
+          .filename,
+      ).toEqual("document.pdf");
+      expect(
+        (result.current.messages[1].content[1] as MessageContentFile).file
+          .file_data,
+      ).toEqual("base64encodeddata");
+      expect(
+        (result.current.messages[1].content[1] as MessageContentFile).file
+          .mime_type,
+      ).toEqual("application/pdf");
+    });
+  });
+
+  it("handles mixed content with text, images, and files", async () => {
+    const mockStreamCallback = mockStreamCallbackFactory([
+      metadataEvent,
+      {
+        event: "messages",
+        data: [
+          {
+            id: "run-1",
+            content: [
+              {
+                type: "text",
+                text: "Here are the resources:",
+              },
+              {
+                type: "image_url",
+                image_url: { url: "https://example.com/chart.png" },
+              },
+              {
+                type: "file",
+                file: {
+                  filename: "report.pdf",
+                  file_data: "pdfbase64data",
+                  mime_type: "application/pdf",
+                },
+              },
+              {
+                type: "text",
+                text: "Let me know if you need anything else!",
+              },
+            ],
+            type: "AIMessageChunk",
+            name: null,
+            tool_calls: [],
+            invalid_tool_calls: [],
+            tool_call_chunks: [],
+          },
+          {
+            run_attempt: 1,
+          },
+        ],
+      },
+    ]);
+
+    const { result } = renderHook(() =>
+      useLangGraphMessages({
+        stream: mockStreamCallback,
+        appendMessage: appendLangChainChunk,
+      }),
+    );
+
+    act(() => {
+      result.current.sendMessage(
+        [
+          {
+            type: "human",
+            content: "Show me the analysis",
+          },
+        ],
+        {},
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.messages.length).toEqual(2);
+      expect(result.current.messages[1].type).toEqual("ai");
+      expect(result.current.messages[1].content.length).toEqual(4);
+
+      // Verify all content types
+      expect(
+        (result.current.messages[1].content[0] as MessageContentText).type,
+      ).toEqual("text");
+      expect(
+        (result.current.messages[1].content[1] as MessageContentImageUrl).type,
+      ).toEqual("image_url");
+      expect(
+        (result.current.messages[1].content[2] as MessageContentFile).type,
+      ).toEqual("file");
+      expect(
+        (result.current.messages[1].content[3] as MessageContentText).type,
+      ).toEqual("text");
     });
   });
 });
