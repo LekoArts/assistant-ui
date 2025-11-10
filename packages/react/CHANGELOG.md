@@ -1,5 +1,12 @@
 # @assistant-ui/react
 
+## 0.11.38
+
+### Patch Changes
+
+- 66a13a0: fix: separate scroll-to-bottom button from autoScroll behavior (#1916)
+- eef682b: fix(react): update check for scroll position in autoscroll
+
 ## 0.11.37
 
 ### Patch Changes
